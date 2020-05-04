@@ -11,9 +11,11 @@ with [MQTT discovery](https://www.home-assistant.io/docs/mqtt/discovery/s).
 
 ## Installing
 
-wb-hass-gw can be installed directly to Wiren Board or to any other Linux machine.
+#### **wb-hass-gw** can be installed directly to Wiren Board:
 
 ```shell script
+apt install pip3
+pip3 install virtualenv
 cd /opt
 git clone https://github.com/Hacker-CB/wb-hass-gw
 cd wb-hass-gw
