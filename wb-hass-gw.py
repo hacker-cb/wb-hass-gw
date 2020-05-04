@@ -37,7 +37,7 @@ LOGLEVEL_MAPPER = {
 }
 
 config_schema = Schema({
-    Required('general'): {
+    Optional('general'): {
         Optional('loglevel', default=ConfigLogLevel.INFO): Coerce(ConfigLogLevel),
     },
     Required('wirenboard'): {
