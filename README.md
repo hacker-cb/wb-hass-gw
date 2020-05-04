@@ -119,7 +119,15 @@ All Wiren Board types are documented [Wiren Board MQTT Conventions](https://gith
 | resistance            |  sensor         |                                
 | concentration         |  sensor         |                                
 | heat_power            |  sensor         |                                
-| heat_energy           |  sensor         |                                
+| heat_energy           |  sensor         |    
+
+#### Additional types 
+
+Types which are not part of the Wiren Board, but can be added with custom templates for [wb-mqtt-serial](https://github.com/wirenboard/wb-mqtt-serial))
+
+| Wiren Board           |  Home Assistant | Units |
+|-----------------------|-----------------|-------|
+| current               |  sensor         | A     |
 
 ## TODO
 

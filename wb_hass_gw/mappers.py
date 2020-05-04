@@ -35,6 +35,9 @@ class WirenControlType(Enum):
     heat_power = "heat_power"
     heat_energy = "heat_energy"
 
+    # custom types
+    current = "current"
+
 
 WIREN_UNITS_DICT = {
     WirenControlType.temperature: '°C',
@@ -51,6 +54,7 @@ WIREN_UNITS_DICT = {
     WirenControlType.concentration: 'ppm',
     WirenControlType.heat_power: 'Gcal/hour',
     WirenControlType.heat_energy: 'Gcal',
+    WirenControlType.current: 'A',
 }
 
 _WIREN_TO_HASS_MAPPER = {
