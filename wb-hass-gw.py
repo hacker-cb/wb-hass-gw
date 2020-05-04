@@ -27,6 +27,7 @@ class ConfigLogLevel(Enum):
     ERROR = 'ERROR'
     WARNING = 'WARNING'
     INFO = 'INFO'
+    DEBUG = 'DEBUG'
 
 
 LOGLEVEL_MAPPER = {
@@ -34,6 +35,7 @@ LOGLEVEL_MAPPER = {
     ConfigLogLevel.ERROR: logging.ERROR,
     ConfigLogLevel.WARNING: logging.WARNING,
     ConfigLogLevel.INFO: logging.INFO,
+    ConfigLogLevel.DEBUG: logging.DEBUG,
 }
 
 config_schema = Schema({
@@ -60,6 +62,9 @@ config_schema = Schema({
         Optional('status_topic', default='hass/status'): str,
         Optional('status_payload_online', default='online'): str,
         Optional('status_payload_offline', default='offline'): str,
+        Optional('debounce', default={}) : {
+            Optional('sensor', default=1000): int
+        }
     },
 })
 
@@ -71,7 +76,7 @@ def ask_exit(*args):
 
 async def main(conf):
     logging.basicConfig(level=LOGLEVEL_MAPPER[conf['general']['loglevel']])
-    logging.getLogger('gmqtt.mqtt').setLevel(logging.ERROR)  # don't need extra messages from mqtt
+    logging.getLogger('gmqtt').setLevel(logging.ERROR)  # don't need extra messages from mqtt
 
     wiren_conf = conf['wirenboard']
     hass_conf = conf['homeassistant']
@@ -97,6 +102,7 @@ async def main(conf):
         status_topic=hass_conf['status_topic'],
         status_payload_online=hass_conf['status_payload_online'],
         status_payload_offline=hass_conf['status_payload_offline'],
+        debounce=hass_conf['debounce']
     )
     wiren.hass = hass
     hass.wiren = wiren

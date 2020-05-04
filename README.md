@@ -60,7 +60,7 @@ python wb-hass-gw.py -c /etc/wb-hass-hw.yaml
 ## Full config with default values
 ```yaml
 general:  
-  loglevel: INFO # One of INFO/WARNING/ERROR/FATAL
+  loglevel: INFO # One of DEBUG/INFO/WARNING/ERROR/FATAL
   
   wirenboard: 
     broker_host: 
@@ -82,6 +82,8 @@ general:
     status_topic: 'hass/status'
     status_payload_online: 'online'
     status_payload_offline: 'offline'
+    debounce:
+      sensor: 1000 # (ms) debounce for sensors to prevent HA from flood
 ```
 
 
@@ -133,8 +135,6 @@ Types which are not part of the Wiren Board, but can be added with custom templa
 
 * Add support for `range`
 * Add support for `rgb`
-* Add debounce policy to prevent flood on analog sensors. For example. Wiren Board can poll MODBUS every 10ms, but we don't need so often updates on analog sensors. 
-This can be only useful on digital inputs to handle click events.
 * Need to delete entities after they will be disappeared in Wiren Board.
 * Add device information if available (version, serial)
 

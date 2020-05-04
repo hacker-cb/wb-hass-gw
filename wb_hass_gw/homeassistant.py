@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import time
 
 from wb_hass_gw.base_connector import BaseConnector
 from wb_hass_gw.mappers import apply_payload_for_component
@@ -19,6 +20,7 @@ class HomeAssistantConnector(BaseConnector):
                  status_topic,
                  status_payload_online,
                  status_payload_offline,
+                 debounce
                  ):
         super().__init__(broker_host, broker_port, username, password, client_id)
 
@@ -28,8 +30,11 @@ class HomeAssistantConnector(BaseConnector):
         self._status_topic = status_topic
         self._status_payload_online = status_payload_online
         self._status_payload_offline = status_payload_offline
+        self._debounce = debounce
 
         self._control_set_topic_re = re.compile(self._topic_prefix + r"devices/([^/]*)/controls/([^/]*)/on$")
+        self._component_types = {}
+        self._debounce_last_published = {}
 
     def _subscribe(self):
         self._client.subscribe(self._status_topic)
@@ -56,8 +61,19 @@ class HomeAssistantConnector(BaseConnector):
                 self.wiren.set_control_state(device, control, payload, retain=properties['retain'])
 
     def set_control_state(self, device, control, payload, retain):
+        if control.id in self._component_types:
+            component = self._component_types[control.id]
+            if component in self._debounce:
+                debounce_interval = self._debounce[component]
+                if control.id in self._debounce_last_published:
+                    interval = (time.time() - self._debounce_last_published[control.id]) * 1000
+                    if interval < debounce_interval:
+                        return
+        self._debounce_last_published[control.id] = time.time()
+
         target_topic = f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
         self._client.publish(target_topic, payload, qos=0, retain=retain)
+        logger.debug(f'Setting {target_topic}/ -> {payload}')
 
     def _get_control_topic(self, device: WirenDevice, control: WirenControl):
         return f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
@@ -107,6 +123,7 @@ class HomeAssistantConnector(BaseConnector):
 
         control_topic = self._get_control_topic(device, control)
         component = apply_payload_for_component(payload, device, control, control_topic)
+        self._component_types[control.id] = component
 
         if not component:
             logger.warning(f'{device}: Unknown type of wirenboard control: {control}')
@@ -117,5 +134,3 @@ class HomeAssistantConnector(BaseConnector):
         logger.info(f'[{device.id}] {topic} ({control})')
         self._client.publish(topic, json.dumps(payload), qos=1)
         self.publish_availability(device, control)
-
-
