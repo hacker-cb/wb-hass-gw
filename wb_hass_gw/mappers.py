@@ -80,6 +80,8 @@ _WIREN_TO_HASS_MAPPER = {
     WirenControlType.concentration: 'sensor',
     WirenControlType.heat_power: 'sensor',
     WirenControlType.heat_energy: 'sensor',
+
+    WirenControlType.current: 'sensor',
 }
 
 
