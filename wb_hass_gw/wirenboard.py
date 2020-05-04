@@ -69,7 +69,8 @@ class WirenConnector(BaseConnector):
 
         if task_id in self._async_publish_tasks:
             self._async_publish_tasks[task_id].cancel()
-        self._async_publish_tasks[task_id] = asyncio.create_task(do_publish(device, control))
+        loop = asyncio.get_event_loop()
+        self._async_publish_tasks[task_id] = loop.create_task(do_publish(device, control))
 
     def _subscribe(self):
         self._client.subscribe(self._topic_prefix + '/devices/+/meta/+')
