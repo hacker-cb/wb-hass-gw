@@ -9,13 +9,18 @@ with [MQTT discovery](https://www.home-assistant.io/docs/mqtt/discovery/s).
 * Device availability is also tracked based on [meta/error](https://github.com/wirenboard/homeui/blob/master/conventions.md) properties  
 
 
-## Installing
+## Installation and configuration
 
-#### **wb-hass-gw** can be installed directly to Wiren Board:
+### Requirements
+
+* Linux
+* Python >= 3.6
+
+NOTE: **wb-hass-gw**  **CAN'T** be installed directly to Wiren Board, because there is Python 3.5 on it.
+
+### Installing:
 
 ```shell script
-apt install pip3
-pip3 install virtualenv
 cd /opt
 git clone https://github.com/Hacker-CB/wb-hass-gw
 cd wb-hass-gw
