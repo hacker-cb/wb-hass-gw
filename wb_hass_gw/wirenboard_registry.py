@@ -45,7 +45,7 @@ class WirenBoardDeviceRegistry:
 
     local_device_id = 'wirenboard'
     local_device_name = 'Wirenboard'
-    _local_devices = ('wb-adc', 'wbrules', 'wb-gpio', 'power_status', 'network', 'system', 'hwmon', 'buzzer', 'alarms', 'wb-w1')
+    _local_devices = ('wb-adc', 'wbrules', 'wb-gpio', 'power_status', 'network', 'system', 'hwmon', 'buzzer', 'alarms')
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
