@@ -37,8 +37,8 @@ class HomeAssistantConnector(BaseConnector):
         self._debounce_last_published = {}
 
     def _subscribe(self):
-        self._client.subscribe(self._status_topic)
-        self._client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on")
+        self._client.subscribe(self._status_topic, qos=1)
+        self._client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on", qos=1)
 
     async def _on_message(self, client, topic, payload, qos, properties):
         # print(f'RECV MSG: {topic}', payload)
@@ -72,7 +72,7 @@ class HomeAssistantConnector(BaseConnector):
         self._debounce_last_published[control.id] = time.time()
 
         target_topic = f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
-        self._client.publish(target_topic, payload, qos=0, retain=retain)
+        self._client.publish(target_topic, payload, qos=1, retain=retain)
         logger.debug(f'Setting {target_topic}/ -> {payload}')
 
     def _get_control_topic(self, device: WirenDevice, control: WirenControl):
