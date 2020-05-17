@@ -38,12 +38,10 @@ class WirenConnector(BaseConnector):
 
         if meta_name == 'error':
             # publish availability separately. do not publish all device
-            if not meta_value:
-                control.error = False
-            else:
-                control.error = True
-            self.hass.publish_availability(device, control)
+            if control.apply_error(False if not meta_value else True):
+                self.hass.publish_availability(device, control)
         else:
+            has_changes = False
             if meta_name == 'type':
                 try:
                     control.type = WirenControlType(meta_value)
@@ -52,12 +50,13 @@ class WirenConnector(BaseConnector):
                 except ValueError:
                     logger.warning(f'Unknown type for wirenboard control: {meta_value}')
             elif meta_name == 'readonly':
-                control.read_only = True if meta_value == '1' else False
+                has_changes |= control.apply_read_only(True if meta_value == '1' else False)
             elif meta_name == 'units':
-                control.units = meta_value
+                has_changes |= control.apply_units(meta_value)
             elif meta_name == 'max':
-                control.max = int(meta_value) if meta_value else None
-        self._async_publish_with_delay(device, control)
+                has_changes |= control.apply_max(int(meta_value) if meta_value else None)
+            if has_changes:
+                self._async_publish_with_delay(device, control)
 
     def _async_publish_with_delay(self, device: WirenDevice, control: WirenControl):
         task_id = f"{device.id}_{control.id}"

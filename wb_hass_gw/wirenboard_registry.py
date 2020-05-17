@@ -15,6 +15,34 @@ class WirenControl:
     def __init__(self, control_id):
         self.id = control_id
 
+    def apply_read_only(self, read_only):
+        if self.read_only == read_only:
+            return False
+        else:
+            self.read_only = read_only
+            return True
+
+    def apply_error(self, error):
+        if self.error == error:
+            return False
+        else:
+            self.error = error
+            return True
+
+    def apply_units(self, units):
+        if self.units == units:
+            return False
+        else:
+            self.units = units
+            return True
+
+    def apply_max(self, max):
+        if self.max == max:
+            return False
+        else:
+            self.max = max
+            return True
+
     def __str__(self) -> str:
         return f'Control [{self.id}] type: {self.type}, units: {self.units}, read_only: {self.read_only}, error: {self.error}, max: {self.max}'
 
