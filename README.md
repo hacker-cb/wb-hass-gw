@@ -1,7 +1,7 @@
 # Wiren Board - Home Assistant geteway
 
 Gateway to connect [Wiren Board](https://wirenboard.com/) to [Home Assistant](http://home-assistant.io) 
-with [MQTT discovery](https://www.home-assistant.io/docs/mqtt/discovery/s).
+with [MQTT discovery](https://www.home-assistant.io/docs/mqtt/discovery).
 
 * All devices connected to WirenBoard should be added to HomeAssistant automatically. 
 * You don't need to write manually configuration for each sensor/switch/etc...
