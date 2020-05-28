@@ -142,6 +142,7 @@ Types which are not part of the Wiren Board, but can be added with custom templa
 * Add support for `rgb`
 * Need to delete entities after they will be disappeared in Wiren Board.
 * Add device information if available (version, serial)
+* Handle wirenboard disconnect
 
 ## Known issues
 

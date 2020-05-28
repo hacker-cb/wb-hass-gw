@@ -48,3 +48,9 @@ class BaseConnector(ABC):
     def _subscribe(self):
         pass
 
+    def _publish(self, message_or_topic, payload=None, qos=0, retain=False, **kwargs):
+        if not self._client.is_connected:
+            logger.warning("Client not ready")
+            return
+        self._publish(message_or_topic, payload, qos, retain, **kwargs)
+

@@ -93,4 +93,4 @@ class WirenConnector(BaseConnector):
 
     def set_control_state(self, device: WirenDevice, control: WirenControl, payload, retain):
         target_topic = f"{self._topic_prefix}/devices/{device.id}/controls/{control.id}/on"
-        self._client.publish(target_topic, payload, qos=1, retain=retain)
+        self._publish(target_topic, payload, qos=1, retain=retain)

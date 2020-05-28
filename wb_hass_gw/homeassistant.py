@@ -72,7 +72,7 @@ class HomeAssistantConnector(BaseConnector):
         self._debounce_last_published[control.id] = time.time()
 
         target_topic = f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
-        self._client.publish(target_topic, payload, qos=1, retain=retain)
+        self._publish(target_topic, payload, qos=1, retain=retain)
         logger.debug(f'Setting {target_topic}/ -> {payload}')
 
     def _get_control_topic(self, device: WirenDevice, control: WirenControl):
@@ -83,9 +83,9 @@ class HomeAssistantConnector(BaseConnector):
 
     def publish_availability(self, device: WirenDevice, control: WirenControl):
         if not control.error:
-            self._client.publish(self._get_availability_topic(device, control), '1', qos=1, retain=1)
+            self._publish(self._get_availability_topic(device, control), '1', qos=1, retain=1)
         else:
-            self._client.publish(self._get_availability_topic(device, control), '0', qos=1, retain=1)
+            self._publish(self._get_availability_topic(device, control), '0', qos=1, retain=1)
 
     def publish_control(self, device: WirenDevice, control: WirenControl):
         """
@@ -132,5 +132,5 @@ class HomeAssistantConnector(BaseConnector):
         # Topic path: <discovery_topic>/<component>/[<node_id>/]<object_id>/config
         topic = self._discovery_prefix + '/' + component + '/' + entity_unique_id + '/config'
         logger.info(f'[{device.id}] {topic} ({control})')
-        self._client.publish(topic, json.dumps(payload), qos=1)
+        self._publish(topic, json.dumps(payload), qos=1)
         self.publish_availability(device, control)
