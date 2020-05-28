@@ -36,9 +36,9 @@ class HomeAssistantConnector(BaseConnector):
         self._component_types = {}
         self._debounce_last_published = {}
 
-    def _subscribe(self):
-        self._client.subscribe(self._status_topic, qos=1)
-        self._client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on", qos=1)
+    def _subscribe(self, client):
+        client.subscribe(self._status_topic, qos=1)
+        client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on", qos=1)
 
     async def _on_message(self, client, topic, payload, qos, properties):
         # print(f'RECV MSG: {topic}', payload)

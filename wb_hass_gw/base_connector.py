@@ -32,7 +32,7 @@ class BaseConnector(ABC):
 
     def _on_connect(self, client, flags, rc, properties):
         logger.info(f'Connected to {self._broker_host}')
-        return self._subscribe()
+        return self._subscribe(client)
 
     @abstractmethod
     async def _on_message(self, client, topic, payload, qos, properties):
@@ -45,12 +45,12 @@ class BaseConnector(ABC):
         logger.info(f'Disconnected from {self._broker_host}')
 
     @abstractmethod
-    def _subscribe(self):
+    def _subscribe(self, client):
         pass
 
     def _publish(self, message_or_topic, payload=None, qos=0, retain=False, **kwargs):
         if not self._client.is_connected:
-            logger.warning("Client not ready")
+            logger.warning(f"Client not ready ({self._broker_host})")
             return
-        self._publish(message_or_topic, payload, qos, retain, **kwargs)
+        self._client.publish(message_or_topic, payload, qos, retain, **kwargs)
 

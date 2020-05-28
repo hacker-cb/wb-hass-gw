@@ -71,10 +71,10 @@ class WirenConnector(BaseConnector):
         loop = asyncio.get_event_loop()
         self._async_publish_tasks[task_id] = loop.create_task(do_publish(device, control))
 
-    def _subscribe(self):
-        self._client.subscribe(self._topic_prefix + '/devices/+/meta/+', qos=1)
-        self._client.subscribe(self._topic_prefix + '/devices/+/controls/+/meta/+', qos=1)
-        self._client.subscribe(self._topic_prefix + '/devices/+/controls/+', qos=1)
+    def _subscribe(self, client):
+        client.subscribe(self._topic_prefix + '/devices/+/meta/+', qos=1)
+        client.subscribe(self._topic_prefix + '/devices/+/controls/+/meta/+', qos=1)
+        client.subscribe(self._topic_prefix + '/devices/+/controls/+', qos=1)
 
     async def _on_message(self, client, topic, payload, qos, properties):
         # print(f'RECV MSG: {topic}', payload)
