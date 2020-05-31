@@ -89,7 +89,8 @@ class WirenConnector(BaseConnector):
         elif control_state_topic_match:
             device = WirenBoardDeviceRegistry().get_device(control_state_topic_match.group(1))
             control = device.get_control(control_state_topic_match.group(2))
-            self.hass.set_control_state(device, control, payload, properties['retain'])
+            control.state = payload
+            self.hass.set_control_state(device, control, payload)
 
     def set_control_state(self, device: WirenDevice, control: WirenControl, payload, retain):
         target_topic = f"{self._topic_prefix}/devices/{device.id}/controls/{control.id}/on"

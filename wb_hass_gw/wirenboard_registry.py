@@ -11,6 +11,7 @@ class WirenControl:
     error = False
     units = None
     max = None
+    state = None
 
     def __init__(self, control_id):
         self.id = control_id

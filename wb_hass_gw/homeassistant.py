@@ -60,7 +60,7 @@ class HomeAssistantConnector(BaseConnector):
                 control = device.get_control(control_set_state_topic_match.group(2))
                 self.wiren.set_control_state(device, control, payload, retain=properties['retain'])
 
-    def set_control_state(self, device, control, payload, retain):
+    def set_control_state(self, device, control, state):
         if control.id in self._component_types:
             component = self._component_types[control.id]
             if component in self._debounce:
@@ -72,8 +72,8 @@ class HomeAssistantConnector(BaseConnector):
         self._debounce_last_published[control.id] = time.time()
 
         target_topic = f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
-        self._publish(target_topic, payload, qos=1, retain=retain)
-        logger.debug(f'Setting {target_topic}/ -> {payload}')
+        self._publish(target_topic, state, qos=1, retain=0)
+        logger.debug(f'Setting {target_topic}/ -> {state}')
 
     def _get_control_topic(self, device: WirenDevice, control: WirenControl):
         return f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
@@ -83,9 +83,9 @@ class HomeAssistantConnector(BaseConnector):
 
     def publish_availability(self, device: WirenDevice, control: WirenControl):
         if not control.error:
-            self._publish(self._get_availability_topic(device, control), '1', qos=1, retain=1)
+            self._publish(self._get_availability_topic(device, control), '1', qos=1, retain=0)
         else:
-            self._publish(self._get_availability_topic(device, control), '0', qos=1, retain=1)
+            self._publish(self._get_availability_topic(device, control), '0', qos=1, retain=0)
 
     def publish_control(self, device: WirenDevice, control: WirenControl):
         """
@@ -134,3 +134,4 @@ class HomeAssistantConnector(BaseConnector):
         logger.info(f'[{device.id}] {topic} ({control})')
         self._publish(topic, json.dumps(payload), qos=1)
         self.publish_availability(device, control)
+        self.set_control_state(device, control)
