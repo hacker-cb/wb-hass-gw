@@ -45,7 +45,7 @@ class WirenControl:
             return True
 
     def __str__(self) -> str:
-        return f'Control [{self.id}] type: {self.type}, units: {self.units}, read_only: {self.read_only}, error: {self.error}, max: {self.max}'
+        return f'Control [{self.id}] type: {self.type}, units: {self.units}, read_only: {self.read_only}, error: {self.error}, max: {self.max}, state: {self.state}'
 
 
 class WirenDevice:
