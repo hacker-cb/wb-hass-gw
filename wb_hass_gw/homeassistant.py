@@ -134,4 +134,4 @@ class HomeAssistantConnector(BaseConnector):
         logger.info(f'[{device.id}] {topic} ({control})')
         self._publish(topic, json.dumps(payload), qos=1)
         self.publish_availability(device, control)
-        self.set_control_state(device, control)
+        self.set_control_state(device, control, control.state)
