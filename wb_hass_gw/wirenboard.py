@@ -42,11 +42,13 @@ class WirenConnector(BaseConnector):
                 self.hass.publish_availability(device, control)
         else:
             has_changes = False
-            if meta_name == 'type':
+            if meta_name == 'order':
+                return  # Ignore
+            elif meta_name == 'type':
                 try:
-                    control.type = WirenControlType(meta_value)
+                    has_changes |= control.apply_type(WirenControlType(meta_value))
                     if control.type in WIREN_UNITS_DICT:
-                        control.units = WIREN_UNITS_DICT[control.type]
+                        has_changes |= control.apply_units(WIREN_UNITS_DICT[control.type])
                 except ValueError:
                     logger.warning(f'Unknown type for wirenboard control: {meta_value}')
             elif meta_name == 'readonly':

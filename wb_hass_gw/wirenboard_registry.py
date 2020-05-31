@@ -16,6 +16,13 @@ class WirenControl:
     def __init__(self, control_id):
         self.id = control_id
 
+    def apply_type(self, t):
+        if self.type == t:
+            return False
+        else:
+            self.type = t
+            return True
+
     def apply_read_only(self, read_only):
         if self.read_only == read_only:
             return False
