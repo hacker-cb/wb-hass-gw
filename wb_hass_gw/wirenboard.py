@@ -22,6 +22,7 @@ class WirenConnector(BaseConnector):
         self._control_meta_topic_re = re.compile(self._topic_prefix + r"/devices/([^/]*)/controls/([^/]*)/meta/([^/]*)")
         self._control_state_topic_re = re.compile(self._topic_prefix + r"/devices/([^/]*)/controls/([^/]*)$")
         self._async_publish_tasks = {}  # We need async publish to wait that we go all meta from mqtt
+        self._unknown_types = []
 
     @staticmethod
     def _on_device_meta_change(device_id, meta_name, meta_value):
@@ -50,7 +51,9 @@ class WirenConnector(BaseConnector):
                     if control.type in WIREN_UNITS_DICT:
                         has_changes |= control.apply_units(WIREN_UNITS_DICT[control.type])
                 except ValueError:
-                    logger.warning(f'Unknown type for wirenboard control: {meta_value}')
+                    if not meta_value in self._unknown_types:
+                        logger.warning(f'Unknown type for wirenboard control: {meta_value}')
+                        self._unknown_types.append(meta_value)
             elif meta_name == 'readonly':
                 has_changes |= control.apply_read_only(True if meta_value == '1' else False)
             elif meta_name == 'units':

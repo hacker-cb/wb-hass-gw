@@ -97,6 +97,9 @@ def wiren_to_hass_type(control):
     return None
 
 
+_unknown_types = []
+
+
 def apply_payload_for_component(payload, device, control, control_topic):
     hass_entity_type = wiren_to_hass_type(control)
 
@@ -146,7 +149,9 @@ def apply_payload_for_component(payload, device, control, control_topic):
     #         'brightness_scale': control.max
     #     })
     else:
-        logger.warning(f'No algorithm for hass type: "{hass_entity_type}" ({control})')
+        if not hass_entity_type in _unknown_types:
+            logger.warning(f"No algorithm for hass type '{control.type.name}', hass: '{hass_entity_type}'")
+            _unknown_types.append(hass_entity_type)
         return None
 
     return hass_entity_type

@@ -126,12 +126,11 @@ class HomeAssistantConnector(BaseConnector):
         self._component_types[control.id] = component
 
         if not component:
-            logger.warning(f'{device}: Unknown type of wirenboard control: {control}')
             return
 
         # Topic path: <discovery_topic>/<component>/[<node_id>/]<object_id>/config
         topic = self._discovery_prefix + '/' + component + '/' + entity_unique_id + '/config'
-        logger.info(f'[{device.id}] {topic} ({control})')
+        logger.info(f'Publish config to {topic}')
         self._publish(topic, json.dumps(payload), qos=1)
         self.publish_availability(device, control)
         self.set_control_state(device, control, control.state)
