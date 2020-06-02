@@ -67,7 +67,7 @@ class WirenConnector(BaseConnector):
             if has_changes:
                 self.hass.publish_config(device, control)
 
-    def _subscribe(self, client):
+    def _on_connect(self, client):
         client.subscribe(self._topic_prefix + '/devices/+/meta/+', qos=1)
         client.subscribe(self._topic_prefix + '/devices/+/controls/+/meta/+', qos=1)
         client.subscribe(self._topic_prefix + '/devices/+/controls/+', qos=1)

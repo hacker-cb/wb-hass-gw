@@ -45,9 +45,10 @@ class HomeAssistantConnector(BaseConnector):
         self._debounce_last_published = {}
         self._async_tasks = {}
 
-    def _subscribe(self, client):
+    def _on_connect(self, client):
         client.subscribe(self._status_topic, qos=1)
         client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on", qos=1)
+        self._publish_all_controls()
 
     async def _on_message(self, client, topic, payload, qos, properties):
         # print(f'RECV MSG: {topic}', payload)
@@ -55,9 +56,7 @@ class HomeAssistantConnector(BaseConnector):
         if topic == self._status_topic:
             if payload == self._status_payload_online:
                 logger.info('Home assistant changed status to online. Pushing all devices')
-                for device in WirenBoardDeviceRegistry().devices.values():
-                    for control in device.controls.values():
-                        self.publish_config(device, control)
+                self._publish_all_controls()
             elif payload == self._status_payload_offline:
                 logger.info('Home assistant changed status to offline')
             else:
@@ -68,6 +67,11 @@ class HomeAssistantConnector(BaseConnector):
                 device = WirenBoardDeviceRegistry().get_device(control_set_state_topic_match.group(1))
                 control = device.get_control(control_set_state_topic_match.group(2))
                 self.wiren.set_control_state(device, control, payload, retain=properties['retain'])
+
+    def _publish_all_controls(self):
+        for device in WirenBoardDeviceRegistry().devices.values():
+            for control in device.controls.values():
+                self.publish_config(device, control)
 
     def _get_control_topic(self, device: WirenDevice, control: WirenControl):
         return f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"

@@ -17,7 +17,7 @@ class BaseConnector(ABC):
         self._client_id = client_id
 
         self._client = MQTTClient(self._client_id)
-        self._client.on_connect = self._on_connect
+        self._client.on_connect = self.__on_connect
         self._client.on_message = self._on_message
         self._client.on_disconnect = self._on_disconnect
         self._client.on_subscribe = self._on_subscribe
@@ -30,9 +30,9 @@ class BaseConnector(ABC):
     def disconnect(self):
         return self._client.disconnect()
 
-    def _on_connect(self, client, flags, rc, properties):
+    def __on_connect(self, client, flags, rc, properties):
         logger.info(f'Connected to {self._broker_host}')
-        return self._subscribe(client)
+        return self._on_connect(client)
 
     @abstractmethod
     async def _on_message(self, client, topic, payload, qos, properties):
@@ -42,10 +42,10 @@ class BaseConnector(ABC):
         logger.debug(f'Subscribed ({self._broker_host})')
 
     def _on_disconnect(self, packet, exc=None):
-        logger.info(f'Disconnected from {self._broker_host}')
+        logger.warning(f'Disconnected from {self._broker_host}')
 
     @abstractmethod
-    def _subscribe(self, client):
+    def _on_connect(self, client):
         pass
 
     def _publish(self, message_or_topic, payload=None, qos=0, retain=False, **kwargs):
