@@ -8,13 +8,17 @@ logger = logging.getLogger(__name__)
 class WirenControl:
     type: WirenControlType = None
     read_only = False
-    error = False
+    error = None
     units = None
     max = None
     state = None
 
     def __init__(self, control_id):
         self.id = control_id
+
+    @property
+    def debug_id(self):
+        return self.id.lower().replace(" ", "_").replace("-", "_")
 
     def apply_type(self, t):
         if self.type == t:
@@ -61,6 +65,10 @@ class WirenDevice:
     def __init__(self, device_id):
         self.id = device_id
         self._controls = {}
+
+    @property
+    def debug_id(self):
+        return self.id.lower().replace(" ", "_").replace("-", "_")
 
     @property
     def controls(self):

@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import re
@@ -12,6 +13,13 @@ logger = logging.getLogger(__name__)
 
 class HomeAssistantConnector(BaseConnector):
     wiren = None
+    _availability_qos = 1
+    _availability_retain = False
+    _availability_publish_delay = 0.5  # Delay (sec) before publishing
+
+    _config_qos = 1
+    _config_retain = False
+    _config_publish_delay = 1.0  # Delay (sec) before publishing to ensure that we got all meta topics
 
     def __init__(self, broker_host, broker_port, username, password, client_id,
                  topic_prefix,
@@ -35,6 +43,7 @@ class HomeAssistantConnector(BaseConnector):
         self._control_set_topic_re = re.compile(self._topic_prefix + r"devices/([^/]*)/controls/([^/]*)/on$")
         self._component_types = {}
         self._debounce_last_published = {}
+        self._async_tasks = {}
 
     def _subscribe(self, client):
         client.subscribe(self._status_topic, qos=1)
@@ -48,7 +57,7 @@ class HomeAssistantConnector(BaseConnector):
                 logger.info('Home assistant changed status to online. Pushing all devices')
                 for device in WirenBoardDeviceRegistry().devices.values():
                     for control in device.controls.values():
-                        self.publish_control(device, control)
+                        self.publish_config(device, control)
             elif payload == self._status_payload_offline:
                 logger.info('Home assistant changed status to offline')
             else:
@@ -60,7 +69,19 @@ class HomeAssistantConnector(BaseConnector):
                 control = device.get_control(control_set_state_topic_match.group(2))
                 self.wiren.set_control_state(device, control, payload, retain=properties['retain'])
 
-    def set_control_state(self, device, control, state):
+    def _get_control_topic(self, device: WirenDevice, control: WirenControl):
+        return f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
+
+    def _get_availability_topic(self, device: WirenDevice, control: WirenControl):
+        return f"{self._get_control_topic(device, control)}/availability"
+
+    def _run_task(self, task_id, task):
+        loop = asyncio.get_event_loop()
+        if task_id in self._async_tasks:
+            self._async_tasks[task_id].cancel()
+        self._async_tasks[task_id] = loop.create_task(task)
+
+    def publish_state(self, device, control):
         if control.id in self._component_types:
             component = self._component_types[control.id]
             if component in self._debounce:
@@ -69,25 +90,39 @@ class HomeAssistantConnector(BaseConnector):
                     interval = (time.time() - self._debounce_last_published[control.id]) * 1000
                     if interval < debounce_interval:
                         return
+        self._publish_state_sync(device, control)
+
+    def _publish_state_sync(self, device, control):
+        target_topic = f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
+        self._publish(target_topic, control.state, qos=1, retain=0)
+        logger.debug(f"[{device.debug_id}/{control.debug_id}] state: {control.state}")
         self._debounce_last_published[control.id] = time.time()
 
-        target_topic = f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
-        self._publish(target_topic, state, qos=1, retain=0)
-        logger.debug(f'Setting {target_topic}/ -> {state}')
-
-    def _get_control_topic(self, device: WirenDevice, control: WirenControl):
-        return f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
-
-    def _get_availability_topic(self, device: WirenDevice, control: WirenControl):
-        return f"{self._get_control_topic(device, control)}/availability"
-
     def publish_availability(self, device: WirenDevice, control: WirenControl):
-        if not control.error:
-            self._publish(self._get_availability_topic(device, control), '1', qos=1, retain=0)
-        else:
-            self._publish(self._get_availability_topic(device, control), '0', qos=1, retain=0)
+        async def publish_availability():
+            await asyncio.sleep(self._availability_publish_delay)
+            self._publish_config_sync(device, control)
 
-    def publish_control(self, device: WirenDevice, control: WirenControl):
+        self._run_task(f"{device.id}_{control.id}_availability", publish_availability())
+
+    def _publish_availability_sync(self, device: WirenDevice, control: WirenControl):
+        topic = self._get_availability_topic(device, control)
+        payload = '1' if not control.error else '0'
+        logger.info(f"[{device.debug_id}/{control.debug_id}] availability: {'online' if control.state else 'offline'}")
+        self._publish(topic, payload, qos=self._availability_qos, retain=self._availability_retain)
+
+    def publish_config(self, device: WirenDevice, control: WirenControl):
+        async def do_publish_config():
+            await asyncio.sleep(self._config_publish_delay)
+            self._publish_config_sync(device, control)
+
+            # Publish availability and state every time after publishing config
+            self._publish_availability_sync(device, control)
+            self._publish_state_sync(device, control)
+
+        self._run_task(f"{device.id}_{control.id}_config", do_publish_config())
+
+    def _publish_config_sync(self, device: WirenDevice, control: WirenControl):
         """
         Publish discovery topic to the HA
         """
@@ -132,7 +167,5 @@ class HomeAssistantConnector(BaseConnector):
 
         # Topic path: <discovery_topic>/<component>/[<node_id>/]<object_id>/config
         topic = self._discovery_prefix + '/' + component + '/' + node_id + '/' + object_id + '/config'
-        logger.info(f'Publish config to {topic}')
-        self._publish(topic, json.dumps(payload), qos=1)
-        self.publish_availability(device, control)
-        self.set_control_state(device, control, control.state)
+        logger.info(f"[{device.debug_id}/{control.debug_id}] publish config to '{topic}'")
+        self._publish(topic, json.dumps(payload), qos=self._config_qos, retain=self._config_retain)
