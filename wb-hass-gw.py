@@ -64,7 +64,18 @@ config_schema = Schema({
         Optional('status_payload_offline', default='offline'): str,
         Optional('debounce', default={}) : {
             Optional('sensor', default=1000): int
-        }
+        },
+        Optional('subscribe_qos', default=0): int,
+        Optional('publish_availability', default={}): {
+            Optional('qos', default=0): int,
+            Optional('retain', default=True): bool,
+            Optional('publish_delay', default=1.0): float,
+        },
+        Optional('publish_config', default={}): {
+            Optional('qos', default=0): int,
+            Optional('retain', default=False): bool,
+            Optional('publish_delay', default=1.0): float,
+        },
     },
 })
 
@@ -102,7 +113,14 @@ async def main(conf):
         status_topic=hass_conf['status_topic'],
         status_payload_online=hass_conf['status_payload_online'],
         status_payload_offline=hass_conf['status_payload_offline'],
-        debounce=hass_conf['debounce']
+        debounce=hass_conf['debounce'],
+        subscribe_qos=hass_conf['subscribe_qos'],
+        availability_qos=hass_conf['publish_availability']['qos'],
+        availability_retain=hass_conf['publish_availability']['retain'],
+        availability_publish_delay=hass_conf['publish_availability']['publish_delay'],
+        config_qos=hass_conf['publish_config']['qos'],
+        config_retain=hass_conf['publish_config']['retain'],
+        config_publish_delay=hass_conf['publish_config']['publish_delay'],
     )
     wiren.hass = hass
     hass.wiren = wiren

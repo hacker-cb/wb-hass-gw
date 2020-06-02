@@ -89,6 +89,15 @@ general:
     status_payload_offline: 'offline'
     debounce:
       sensor: 1000 # (ms) debounce for sensors to prevent HA from flood
+    subscribe_qos: 0
+    publish_availability:
+      qos: 0
+      retain: True
+      publish_delay: 1.0
+    publish_config:
+      qos: 0
+      retain: False
+      publish_delay: 1.0
 ```
 
 

@@ -14,16 +14,6 @@ logger = logging.getLogger(__name__)
 class HomeAssistantConnector(BaseConnector):
     wiren = None
 
-    _subscribe_qos = 1
-
-    _availability_qos = 1
-    _availability_retain = False
-    _availability_publish_delay = 0.5  # Delay (sec) before publishing
-
-    _config_qos = 1
-    _config_retain = False
-    _config_publish_delay = 1.0  # Delay (sec) before publishing to ensure that we got all meta topics
-
     def __init__(self, broker_host, broker_port, username, password, client_id,
                  topic_prefix,
                  entity_prefix,
@@ -31,7 +21,14 @@ class HomeAssistantConnector(BaseConnector):
                  status_topic,
                  status_payload_online,
                  status_payload_offline,
-                 debounce
+                 debounce,
+                 subscribe_qos,
+                 availability_qos,
+                 availability_retain,
+                 availability_publish_delay,
+                 config_qos,
+                 config_retain,
+                 config_publish_delay,
                  ):
         super().__init__(broker_host, broker_port, username, password, client_id)
 
@@ -42,6 +39,13 @@ class HomeAssistantConnector(BaseConnector):
         self._status_payload_online = status_payload_online
         self._status_payload_offline = status_payload_offline
         self._debounce = debounce
+        self._subscribe_qos = subscribe_qos
+        self._availability_retain = availability_retain
+        self._availability_qos = availability_qos
+        self._availability_publish_delay = availability_publish_delay
+        self._config_qos = config_qos
+        self._config_retain = config_retain
+        self._config_publish_delay = config_publish_delay # Delay (sec) before publishing to ensure that we got all meta topics
 
         self._control_set_topic_re = re.compile(self._topic_prefix + r"devices/([^/]*)/controls/([^/]*)/on$")
         self._component_types = {}
