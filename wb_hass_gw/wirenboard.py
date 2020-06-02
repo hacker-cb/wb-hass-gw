@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 class WirenConnector(BaseConnector):
     hass = None
     _publish_delay_sec = 1  # Delay before publishing to ensure that we got all meta topics
+    _subscribe_qos = 1
+    _control_state_publish_qos = 1
+    _control_state_publish_retain = False
 
     def __init__(self, broker_host, broker_port, username, password, client_id, topic_prefix):
         super().__init__(broker_host, broker_port, username, password, client_id)
@@ -68,9 +71,9 @@ class WirenConnector(BaseConnector):
                 self.hass.publish_config(device, control)
 
     def _on_connect(self, client):
-        client.subscribe(self._topic_prefix + '/devices/+/meta/+', qos=1)
-        client.subscribe(self._topic_prefix + '/devices/+/controls/+/meta/+', qos=1)
-        client.subscribe(self._topic_prefix + '/devices/+/controls/+', qos=1)
+        client.subscribe(self._topic_prefix + '/devices/+/meta/+', qos=self._subscribe_qos)
+        client.subscribe(self._topic_prefix + '/devices/+/controls/+/meta/+', qos=self._subscribe_qos)
+        client.subscribe(self._topic_prefix + '/devices/+/controls/+', qos=self._subscribe_qos)
 
     async def _on_message(self, client, topic, payload, qos, properties):
         # print(f'RECV MSG: {topic}', payload)
@@ -88,6 +91,6 @@ class WirenConnector(BaseConnector):
             control.state = payload
             self.hass.publish_state(device, control)
 
-    def set_control_state(self, device: WirenDevice, control: WirenControl, payload, retain):
+    def set_control_state(self, device: WirenDevice, control: WirenControl, payload):
         target_topic = f"{self._topic_prefix}/devices/{device.id}/controls/{control.id}/on"
-        self._publish(target_topic, payload, qos=1, retain=retain)
+        self._publish(target_topic, payload, qos=self._control_state_publish_qos, retain=self._control_state_publish_retain)

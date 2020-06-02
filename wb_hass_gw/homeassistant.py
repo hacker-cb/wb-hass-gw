@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 class HomeAssistantConnector(BaseConnector):
     wiren = None
+
+    _subscribe_qos = 1
+
     _availability_qos = 1
     _availability_retain = False
     _availability_publish_delay = 0.5  # Delay (sec) before publishing
@@ -46,8 +49,8 @@ class HomeAssistantConnector(BaseConnector):
         self._async_tasks = {}
 
     def _on_connect(self, client):
-        client.subscribe(self._status_topic, qos=1)
-        client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on", qos=1)
+        client.subscribe(self._status_topic, qos=self._subscribe_qos)
+        client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on", qos=self._subscribe_qos)
         self._publish_all_controls()
 
     async def _on_message(self, client, topic, payload, qos, properties):
@@ -66,7 +69,7 @@ class HomeAssistantConnector(BaseConnector):
             if control_set_state_topic_match:
                 device = WirenBoardDeviceRegistry().get_device(control_set_state_topic_match.group(1))
                 control = device.get_control(control_set_state_topic_match.group(2))
-                self.wiren.set_control_state(device, control, payload, retain=properties['retain'])
+                self.wiren.set_control_state(device, control, payload)
 
     def _publish_all_controls(self):
         for device in WirenBoardDeviceRegistry().devices.values():
