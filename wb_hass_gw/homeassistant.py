@@ -53,7 +53,7 @@ class HomeAssistantConnector(BaseConnector):
         client.subscribe(f"{self._topic_prefix}devices/+/controls/+/on", qos=self._subscribe_qos)
         self._publish_all_controls()
 
-    async def _on_message(self, client, topic, payload, qos, properties):
+    def _on_message(self, client, topic, payload, qos, properties):
         # print(f'RECV MSG: {topic}', payload)
         payload = payload.decode("utf-8")
         if topic == self._status_topic:

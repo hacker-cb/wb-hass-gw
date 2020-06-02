@@ -75,7 +75,7 @@ class WirenConnector(BaseConnector):
         client.subscribe(self._topic_prefix + '/devices/+/controls/+/meta/+', qos=self._subscribe_qos)
         client.subscribe(self._topic_prefix + '/devices/+/controls/+', qos=self._subscribe_qos)
 
-    async def _on_message(self, client, topic, payload, qos, properties):
+    def _on_message(self, client, topic, payload, qos, properties):
         # print(f'RECV MSG: {topic}', payload)
         payload = payload.decode("utf-8")
         device_topic_match = self._device_meta_topic_re.match(topic)

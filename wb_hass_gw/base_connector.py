@@ -35,7 +35,7 @@ class BaseConnector(ABC):
         return self._on_connect(client)
 
     @abstractmethod
-    async def _on_message(self, client, topic, payload, qos, properties):
+    def _on_message(self, client, topic, payload, qos, properties):
         pass
 
     def _on_subscribe(self, client, mid, qos, properties):
