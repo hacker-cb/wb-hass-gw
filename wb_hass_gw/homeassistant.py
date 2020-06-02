@@ -104,8 +104,10 @@ class HomeAssistantConnector(BaseConnector):
             device_unique_id = entity_id_prefix + device.id
             device_name = self._entity_prefix + ' ' + device.name
         device_unique_id = device_unique_id.lower().replace(" ", "_").replace("-", "_")
+        node_id = device_unique_id
 
         entity_unique_id = f"{entity_id_prefix}{device.id}_{control.id}".lower().replace(" ", "_").replace("-", "_")
+        object_id = f"{control.id}".lower().replace(" ", "_").replace("-", "_")
         entity_name = f"{self._entity_prefix} {device.id} {control.id}".replace("_", " ").title()
 
         # common payload
@@ -129,7 +131,7 @@ class HomeAssistantConnector(BaseConnector):
             return
 
         # Topic path: <discovery_topic>/<component>/[<node_id>/]<object_id>/config
-        topic = self._discovery_prefix + '/' + component + '/' + entity_unique_id + '/config'
+        topic = self._discovery_prefix + '/' + component + '/' + node_id + '/' + object_id + '/config'
         logger.info(f'Publish config to {topic}')
         self._publish(topic, json.dumps(payload), qos=1)
         self.publish_availability(device, control)
