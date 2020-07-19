@@ -98,6 +98,9 @@ general:
       qos: 0
       retain: False
       publish_delay: 1.0
+    publish_state:
+      qos: 0
+      retain: True
 ```
 
 

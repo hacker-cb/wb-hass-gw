@@ -71,6 +71,10 @@ config_schema = Schema({
             Optional('retain', default=True): bool,
             Optional('publish_delay', default=1.0): float,
         },
+        Optional('publish_state', default={}): {
+            Optional('qos', default=0): int,
+            Optional('retain', default=True): bool,
+        },
         Optional('publish_config', default={}): {
             Optional('qos', default=0): int,
             Optional('retain', default=False): bool,
@@ -118,6 +122,8 @@ async def main(conf):
         availability_qos=hass_conf['publish_availability']['qos'],
         availability_retain=hass_conf['publish_availability']['retain'],
         availability_publish_delay=hass_conf['publish_availability']['publish_delay'],
+        state_qos=hass_conf['publish_state']['qos'],
+        state_retain=hass_conf['publish_state']['retain'],
         config_qos=hass_conf['publish_config']['qos'],
         config_retain=hass_conf['publish_config']['retain'],
         config_publish_delay=hass_conf['publish_config']['publish_delay'],

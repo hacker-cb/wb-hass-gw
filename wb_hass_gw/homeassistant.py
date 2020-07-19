@@ -26,6 +26,8 @@ class HomeAssistantConnector(BaseConnector):
                  availability_qos,
                  availability_retain,
                  availability_publish_delay,
+                 state_qos,
+                 state_retain,
                  config_qos,
                  config_retain,
                  config_publish_delay,
@@ -43,6 +45,8 @@ class HomeAssistantConnector(BaseConnector):
         self._availability_retain = availability_retain
         self._availability_qos = availability_qos
         self._availability_publish_delay = availability_publish_delay
+        self._state_qos = state_qos
+        self._state_retain = state_retain
         self._config_qos = config_qos
         self._config_retain = config_retain
         self._config_publish_delay = config_publish_delay # Delay (sec) before publishing to ensure that we got all meta topics
@@ -105,7 +109,7 @@ class HomeAssistantConnector(BaseConnector):
 
     def _publish_state_sync(self, device, control):
         target_topic = f"{self._topic_prefix}devices/{device.id}/controls/{control.id}"
-        self._publish(target_topic, control.state, qos=1, retain=0)
+        self._publish(target_topic, control.state, qos=self._state_qos, retain=self._state_retain)
         logger.debug(f"[{device.debug_id}/{control.debug_id}] state: {control.state}")
         self._debounce_last_published[control.id] = time.time()
 
