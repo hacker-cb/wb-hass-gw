@@ -31,6 +31,7 @@ class HomeAssistantConnector(BaseConnector):
                  config_qos,
                  config_retain,
                  config_publish_delay,
+                 inverse
                  ):
         super().__init__(broker_host, broker_port, username, password, client_id)
 
@@ -50,6 +51,7 @@ class HomeAssistantConnector(BaseConnector):
         self._config_qos = config_qos
         self._config_retain = config_retain
         self._config_publish_delay = config_publish_delay # Delay (sec) before publishing to ensure that we got all meta topics
+        self._inverse = inverse
 
         self._control_set_topic_re = re.compile(self._topic_prefix + r"devices/([^/]*)/controls/([^/]*)/on$")
         self._component_types = {}
@@ -172,9 +174,10 @@ class HomeAssistantConnector(BaseConnector):
             'payload_available': "1",
             'payload_not_available': "0"
         }
+        inverse = entity_unique_id in self._inverse
 
         control_topic = self._get_control_topic(device, control)
-        component = apply_payload_for_component(payload, device, control, control_topic)
+        component = apply_payload_for_component(payload, device, control, control_topic, inverse=inverse)
         self._component_types[control.id] = component
 
         if not component:

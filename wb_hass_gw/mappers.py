@@ -100,22 +100,29 @@ def wiren_to_hass_type(control):
 _unknown_types = []
 
 
-def apply_payload_for_component(payload, device, control, control_topic):
+def apply_payload_for_component(payload, device, control, control_topic, inverse: bool):
     hass_entity_type = wiren_to_hass_type(control)
+
+    if inverse:
+        _payload_on = '0'
+        _payload_off = '1'
+    else:
+        _payload_on = '1'
+        _payload_off = '0'
 
     if hass_entity_type == 'switch':
         payload.update({
-            'payload_on': '1',
-            'payload_off': '0',
-            'state_on': '1',
-            'state_off': '0',
+            'payload_on': _payload_on,
+            'payload_off': _payload_off,
+            'state_on': _payload_on,
+            'state_off': _payload_off,
             'state_topic': f"{control_topic}",
             'command_topic': f"{control_topic}/on",
         })
     elif hass_entity_type == 'binary_sensor':
         payload.update({
-            'payload_on': '1',
-            'payload_off': '0',
+            'payload_on': _payload_on,
+            'payload_off': _payload_off,
             'state_topic': f"{control_topic}",
         })
     elif hass_entity_type == 'sensor':

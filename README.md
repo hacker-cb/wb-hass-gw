@@ -101,6 +101,8 @@ general:
     publish_state:
       qos: 0
       retain: True
+    inverse: # Unique ID of the boolean entitis to inverse (switch/binary_sensor)
+      - wb1_wb_mr6c_28_k1
 ```
 
 
