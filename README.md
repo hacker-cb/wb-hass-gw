@@ -58,51 +58,51 @@ NOTE: birth_message/will_message are needed to resend all devices after Home Ass
 
 ### Run 
 ```shell script
-python wb-hass-gw.py -c /etc/wb-hass-hw.yaml
+python wb-hass-gw.py -c /etc/wb-hass-gw.yaml
 ```
 
 
 ## Full config with default values
 ```yaml
-general:  
+general:
   loglevel: INFO # One of DEBUG/INFO/WARNING/ERROR/FATAL
-  
-  wirenboard: 
-    broker_host: 
-    broker_port: 1883
-    username:
-    password:
-    client_id: 'wb-hass-gw'
-    topic_prefix: ''
-  
-  homeassistant:
-    broker_host: 
-    broker_port: 1883
-    username:
-    password:
-    client_id: 'wb-hass-gw'
-    topic_prefix:
-    entity_prefix: ''
-    discovery_topic: 'homeassistant'
-    status_topic: 'hass/status'
-    status_payload_online: 'online'
-    status_payload_offline: 'offline'
-    debounce:
-      sensor: 1000 # (ms) debounce for sensors to prevent HA from flood
-    subscribe_qos: 0
-    publish_availability:
-      qos: 0
-      retain: True
-      publish_delay: 1.0
-    publish_config:
-      qos: 0
-      retain: False
-      publish_delay: 1.0
-    publish_state:
-      qos: 0
-      retain: True
-    inverse: # Unique ID of the boolean entitis to inverse (switch/binary_sensor)
-      - wb1_wb_mr6c_28_k1
+
+wirenboard:
+  broker_host:
+  broker_port: 1883
+  username:
+  password:
+  client_id: 'wb-hass-gw'
+  topic_prefix: ''
+
+homeassistant:
+  broker_host:
+  broker_port: 1883
+  username:
+  password:
+  client_id: 'wb-hass-gw'
+  topic_prefix:
+  entity_prefix: ''
+  discovery_topic: 'homeassistant'
+  status_topic: 'hass/status'
+  status_payload_online: 'online'
+  status_payload_offline: 'offline'
+  debounce:
+    sensor: 1000 # (ms) debounce for sensors to prevent HA from flood
+  subscribe_qos: 0
+  publish_availability:
+    qos: 0
+    retain: True
+    publish_delay: 1.0
+  publish_config:
+    qos: 0
+    retain: False
+    publish_delay: 1.0
+  publish_state:
+    qos: 0
+    retain: True
+  inverse: # Unique ID of the boolean entitis to inverse (switch/binary_sensor)
+    - wb1_wb_mr6c_28_k1
 ```
 
 
