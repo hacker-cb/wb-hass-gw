@@ -49,6 +49,7 @@ class HomeAssistantConnector(BaseConnector):
                 for device in WirenBoardDeviceRegistry().devices.values():
                     for control in device.controls.values():
                         self.publish_control(device, control)
+                        self.wiren.async_publish_with_delay(device, control)
             elif payload == self._status_payload_offline:
                 logger.info('Home assistant changed status to offline')
             else:

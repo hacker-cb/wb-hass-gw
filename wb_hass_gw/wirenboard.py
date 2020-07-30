@@ -58,9 +58,9 @@ class WirenConnector(BaseConnector):
             elif meta_name == 'max':
                 has_changes |= control.apply_max(int(meta_value) if meta_value else None)
             if has_changes:
-                self._async_publish_with_delay(device, control)
+                self.async_publish_with_delay(device, control)
 
-    def _async_publish_with_delay(self, device: WirenDevice, control: WirenControl):
+    def async_publish_with_delay(self, device: WirenDevice, control: WirenControl):
         task_id = f"{device.id}_{control.id}"
 
         async def do_publish(d, c):
