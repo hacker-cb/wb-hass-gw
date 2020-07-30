@@ -58,7 +58,7 @@ NOTE: birth_message/will_message are needed to resend all devices after Home Ass
 
 ### Run 
 ```shell script
-python wb-hass-gw.py -c /etc/wb-hass-hw.yaml
+python wb-hass-gw.py -c /etc/wb-hass-gw.yaml
 ```
 
 
@@ -67,28 +67,28 @@ python wb-hass-gw.py -c /etc/wb-hass-hw.yaml
 general:  
   loglevel: INFO # One of DEBUG/INFO/WARNING/ERROR/FATAL
   
-  wirenboard: 
-    broker_host: 
-    broker_port: 1883
-    username:
-    password:
-    client_id: 'wb-hass-gw'
-    topic_prefix: ''
+wirenboard: 
+  broker_host: 
+  broker_port: 1883
+  username:
+  password:
+  client_id: 'wb-hass-gw'
+  topic_prefix: ''
   
-  homeassistant:
-    broker_host: 
-    broker_port: 1883
-    username:
-    password:
-    client_id: 'wb-hass-gw'
-    topic_prefix:
-    entity_prefix: ''
-    discovery_topic: 'homeassistant'
-    status_topic: 'hass/status'
-    status_payload_online: 'online'
-    status_payload_offline: 'offline'
-    debounce:
-      sensor: 1000 # (ms) debounce for sensors to prevent HA from flood
+homeassistant:
+  broker_host: 
+  broker_port: 1883
+  username:
+  password:
+  client_id: 'wb-hass-gw'
+  topic_prefix:
+  entity_prefix: ''
+  discovery_topic: 'homeassistant'
+  status_topic: 'hass/status'
+  status_payload_online: 'online'
+  status_payload_offline: 'offline'
+  debounce:
+    sensor: 1000 # (ms) debounce for sensors to prevent HA from flood
 ```
 
 
