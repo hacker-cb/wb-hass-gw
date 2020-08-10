@@ -118,7 +118,7 @@ class HomeAssistantConnector(BaseConnector):
     def publish_availability(self, device: WirenDevice, control: WirenControl):
         async def publish_availability():
             await asyncio.sleep(self._availability_publish_delay)
-            self._publish_config_sync(device, control)
+            self._publish_availability_sync(device, control)
 
         self._run_task(f"{device.id}_{control.id}_availability", publish_availability())
 
