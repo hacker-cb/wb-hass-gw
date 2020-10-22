@@ -80,7 +80,9 @@ config_schema = Schema({
             Optional('retain', default=False): bool,
             Optional('publish_delay', default=1.0): float,
         },
-        Optional('inverse', default=[]): [str]
+        Optional('inverse', default=[]): [str],
+        Optional('split_devices', default=[]): [str],
+        Optional('split_entities', default=[]): [str]
     },
 })
 
@@ -128,7 +130,9 @@ async def main(conf):
         config_qos=hass_conf['publish_config']['qos'],
         config_retain=hass_conf['publish_config']['retain'],
         config_publish_delay=hass_conf['publish_config']['publish_delay'],
-        inverse=hass_conf['inverse']
+        inverse=hass_conf['inverse'],
+        split_devices=hass_conf['split_devices'],
+        split_entities=hass_conf['split_entities']
     )
     wiren.hass = hass
     hass.wiren = wiren

@@ -31,7 +31,9 @@ class HomeAssistantConnector(BaseConnector):
                  config_qos,
                  config_retain,
                  config_publish_delay,
-                 inverse
+                 inverse,
+                 split_devices,
+                 split_entities
                  ):
         super().__init__(broker_host, broker_port, username, password, client_id)
 
@@ -52,6 +54,8 @@ class HomeAssistantConnector(BaseConnector):
         self._config_retain = config_retain
         self._config_publish_delay = config_publish_delay # Delay (sec) before publishing to ensure that we got all meta topics
         self._inverse = inverse
+        self._split_devices = split_devices
+        self._split_entities = split_entities
 
         self._control_set_topic_re = re.compile(self._topic_prefix + r"devices/([^/]*)/controls/([^/]*)/on$")
         self._component_types = {}
@@ -149,18 +153,25 @@ class HomeAssistantConnector(BaseConnector):
         else:
             entity_id_prefix = ''
 
+
         if WirenBoardDeviceRegistry().is_local_device(device):
             device_unique_id = entity_id_prefix + 'wirenboard'
             device_name = self._entity_prefix + ' Wirenboard'
         else:
             device_unique_id = entity_id_prefix + device.id
             device_name = self._entity_prefix + ' ' + device.name
+
         device_unique_id = device_unique_id.lower().replace(" ", "_").replace("-", "_")
-        node_id = device_unique_id
 
         entity_unique_id = f"{entity_id_prefix}{device.id}_{control.id}".lower().replace(" ", "_").replace("-", "_")
         object_id = f"{control.id}".lower().replace(" ", "_").replace("-", "_")
         entity_name = f"{self._entity_prefix} {device.id} {control.id}".replace("_", " ").title()
+
+        if device_unique_id in self._split_devices or entity_unique_id in self._split_entities:
+            device_unique_id = entity_unique_id
+            device_name = entity_name
+
+        node_id = device_unique_id
 
         # common payload
         payload = {
