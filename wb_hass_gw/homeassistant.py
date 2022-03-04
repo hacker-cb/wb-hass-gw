@@ -33,7 +33,8 @@ class HomeAssistantConnector(BaseConnector):
                  config_publish_delay,
                  inverse,
                  split_devices,
-                 split_entities
+                 split_entities,
+                 ignore_availability
                  ):
         super().__init__(broker_host, broker_port, username, password, client_id)
 
@@ -56,6 +57,7 @@ class HomeAssistantConnector(BaseConnector):
         self._inverse = inverse
         self._split_devices = split_devices
         self._split_entities = split_entities
+        self._ignore_availability = ignore_availability
 
         self._control_set_topic_re = re.compile(self._topic_prefix + r"devices/([^/]*)/controls/([^/]*)/on$")
         self._component_types = {}
@@ -120,6 +122,9 @@ class HomeAssistantConnector(BaseConnector):
         self._debounce_last_published[control.id] = time.time()
 
     def publish_availability(self, device: WirenDevice, control: WirenControl):
+        if self._ignore_availability:
+            return
+
         async def publish_availability():
             await asyncio.sleep(self._availability_publish_delay)
             self._publish_availability_sync(device, control)
@@ -127,6 +132,9 @@ class HomeAssistantConnector(BaseConnector):
         self._run_task(f"{device.id}_{control.id}_availability", publish_availability())
 
     def _publish_availability_sync(self, device: WirenDevice, control: WirenControl):
+        if self._ignore_availability:
+            return
+
         topic = self._get_availability_topic(device, control)
         payload = '1' if not control.error else '0'
         logger.info(f"[{device.debug_id}/{control.debug_id}] availability: {'online' if control.state else 'offline'}")
@@ -152,7 +160,6 @@ class HomeAssistantConnector(BaseConnector):
             entity_id_prefix = self._entity_prefix.lower().replace(" ", "_").replace("-", "_") + '_'
         else:
             entity_id_prefix = ''
-
 
         if WirenBoardDeviceRegistry().is_local_device(device):
             device_unique_id = entity_id_prefix + 'wirenboard'
@@ -180,11 +187,14 @@ class HomeAssistantConnector(BaseConnector):
                 'identifiers': device_unique_id
             },
             'name': entity_name,
-            'unique_id': entity_unique_id,
-            'availability_topic': self._get_availability_topic(device, control),
-            'payload_available': "1",
-            'payload_not_available': "0"
+            'unique_id': entity_unique_id
         }
+
+        if not self._ignore_availability:
+            payload['availability_topic'] = self._get_availability_topic(device, control);
+            payload['payload_available'] = "1"
+            payload['payload_not_available'] = "0"
+
         inverse = entity_unique_id in self._inverse
 
         control_topic = self._get_control_topic(device, control)

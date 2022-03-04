@@ -110,6 +110,8 @@ homeassistant:
     - wb1_wb_mr6c_53 # Represent all device entities as separate device
   split_entities:
     - wb1_wb_mr6c_53_k1 # Represent entity as separate device
+  
+  ignore_availability: False # Do not publish availability topic
 ```
 
 
